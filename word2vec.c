@@ -163,6 +163,7 @@ void SortVocab() {
       train_words += vocab[a].cn;
     }
   }
+  vocab_size++;
   vocab = (struct vocab_word *)realloc(vocab, vocab_size * sizeof(struct vocab_word));
   // Allocate memory for the binary tree construction
   for (a = 0; a < vocab_size; a++) {
@@ -385,8 +386,8 @@ void *TrainModelThread(void *id) {
       while (1) {
         word = ReadWordIndex(fi);
         if (feof(fi)) break;
-        word_count++;
         if (word == -1) continue;
+        word_count++;
         if (word == 0) break;
         // The subsampling randomly discards frequent words while keeping the ranking same
         if (sample > 0) {

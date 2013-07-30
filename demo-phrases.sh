@@ -1,3 +1,4 @@
+
 make clean
 make
 wget http://mattmahoney.net/dc/text8.zip -O text8.gz

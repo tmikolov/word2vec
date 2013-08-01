@@ -163,8 +163,7 @@ void SortVocab() {
       train_words += vocab[a].cn;
     }
   }
-  vocab_size++;
-  vocab = (struct vocab_word *)realloc(vocab, vocab_size * sizeof(struct vocab_word));
+  vocab = (struct vocab_word *)realloc(vocab, (vocab_size + 1) * sizeof(struct vocab_word));
   // Allocate memory for the binary tree construction
   for (a = 0; a < vocab_size; a++) {
     vocab[a].code = (char *)calloc(MAX_CODE_LENGTH, sizeof(char));
@@ -631,7 +630,7 @@ int main(int argc, char **argv) {
     printf("\t-hs <int>\n");
     printf("\t\tUse Hierarchical Softmax; default is 1 (0 = not used)\n");
     printf("\t-negative <int>\n");
-    printf("\t\tNumber of negative examples; default is 5 (0 = not used)\n");
+    printf("\t\tNumber of negative examples; default is 0, common values are 5 - 10 (0 = not used)\n");
     printf("\t-threads <int>\n");
     printf("\t\tUse <int> threads (default 1)\n");
     printf("\t-min-count <int>\n");

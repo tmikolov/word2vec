@@ -90,19 +90,19 @@ int main(int argc, char **argv) {
     cn++;
     for (a = 0; a < cn; a++) {
       for (b = 0; b < words; b++) if (!strcmp(&vocab[b * max_w], st[a])) break;
-      if (b == words) b = 0;
+      if (b == words) b = -1;
       bi[a] = b;
       printf("\nWord: %s  Position in vocabulary: %lld\n", st[a], bi[a]);
-      if (b == 0) {
+      if (b == -1) {
         printf("Out of dictionary word!\n");
         break;
       }
     }
-    if (b == 0) continue;
+    if (b == -1) continue;
     printf("\n                                              Word              Distance\n------------------------------------------------------------------------\n");
     for (a = 0; a < size; a++) vec[a] = 0;
     for (b = 0; b < cn; b++) {
-      if (bi[b] == 0) continue;
+      if (bi[b] == -1) continue;
       for (a = 0; a < size; a++) vec[a] += M[a + bi[b] * size];
     }
     len = 0;

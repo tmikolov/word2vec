@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
       }
     }
     if (b == -1) continue;
-    printf("\n                                              Word              Distance\n------------------------------------------------------------------------\n");
+    printf("\n                                              Word       Cosine distance\n------------------------------------------------------------------------\n");
     for (a = 0; a < size; a++) vec[a] = 0;
     for (b = 0; b < cn; b++) {
       if (bi[b] == -1) continue;

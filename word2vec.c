@@ -648,7 +648,7 @@ int main(int argc, char **argv) {
     printf("\t-read-vocab <file>\n");
     printf("\t\tThe vocabulary will be read from <file>, not constructed from the training data\n");
     printf("\t-cbow <int>\n");
-    printf("\t\tUse the continuous back of words model; default is 0 (skip-gram model)\n");
+    printf("\t\tUse the continuous bag of words model; default is 0 (skip-gram model)\n");
     printf("\nExamples:\n");
     printf("./word2vec -train data.txt -output vec.txt -debug 2 -size 200 -window 5 -sample 1e-4 -negative 5 -hs 0 -binary 0 -cbow 1\n\n");
     return 0;

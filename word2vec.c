@@ -561,10 +561,8 @@ void TrainModel() {
       for (b = 0; b < clcn * layer1_size; b++) cent[b] = 0;
       for (b = 0; b < clcn; b++) centcn[b] = 1;
       for (c = 0; c < vocab_size; c++) {
-        for (d = 0; d < layer1_size; d++) {
-          cent[layer1_size * cl[c] + d] += syn0[c * layer1_size + d];
-          centcn[cl[c]]++;
-        }
+        for (d = 0; d < layer1_size; d++) cent[layer1_size * cl[c] + d] += syn0[c * layer1_size + d];
+        centcn[cl[c]]++;
       }
       for (b = 0; b < clcn; b++) {
         closev = 0;

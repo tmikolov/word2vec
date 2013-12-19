@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
     for (a = 0; a < size; a++) len += vec[a] * vec[a];
     len = sqrt(len);
     for (a = 0; a < size; a++) vec[a] /= len;
-    for (a = 0; a < N; a++) bestd[a] = 0;
+    for (a = 0; a < N; a++) bestd[a] = -1;
     for (a = 0; a < N; a++) bestw[a][0] = 0;
     for (c = 0; c < words; c++) {
       a = 0;

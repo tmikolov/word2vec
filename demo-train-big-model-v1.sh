@@ -89,6 +89,7 @@ wget http://word2vec.googlecode.com/svn/trunk/word2vec.c
 wget http://word2vec.googlecode.com/svn/trunk/word2phrase.c
 wget http://word2vec.googlecode.com/svn/trunk/compute-accuracy.c
 wget http://word2vec.googlecode.com/svn/trunk/questions-words.txt
+wget http://word2vec.googlecode.com/svn/trunk/questions-phrases.txt
 gcc word2vec.c -o word2vec -lm -pthread -O3 -march=native -funroll-loops
 gcc word2phrase.c -o word2phrase -lm -pthread -O3 -march=native -funroll-loops
 gcc compute-accuracy.c -o compute-accuracy -lm -pthread -O3 -march=native -funroll-loops

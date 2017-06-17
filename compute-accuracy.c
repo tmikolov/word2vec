@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 const long long max_size = 2000;         // max length of strings
@@ -26,7 +26,7 @@ const long long max_w = 50;              // max length of vocabulary entries
 int main(int argc, char **argv)
 {
   FILE *f;
-  char st1[max_size], st2[max_size], st3[max_size], st4[max_size], bestw[N][max_size], file_name[max_size], ch;
+  char st1[max_size], st2[max_size], st3[max_size], st4[max_size], bestw[N][max_size], file_name[max_size];
   float dist, len, bestd[N], vec[max_size];
   long long words, size, a, b, c, d, b1, b2, b3, threshold = 0;
   float *M;

@@ -39,10 +39,14 @@ real threshold = 100;
 unsigned long long next_random = 1;
 
 // Reads a single word from a file, assuming space + tab + EOL to be word boundaries
-void ReadWord(char *word, FILE *fin) {
+void ReadWord(char *word, FILE *fin, char *eof) {
   int a = 0, ch;
-  while (!feof(fin)) {
-    ch = fgetc(fin);
+  while (1) {
+    ch = fgetc_unlocked(fin);
+    if (ch == EOF) {
+      *eof = 1;
+      break;
+    }
     if (ch == 13) continue;
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
       if (a > 0) {
@@ -50,7 +54,9 @@ void ReadWord(char *word, FILE *fin) {
         break;
       }
       if (ch == '\n') {
-        strcpy(word, (char *)"</s>");
+        //strcpy(word, (char *)"</s>");
+        word[0] = '\n';
+        word[1] = 0;
         return;
       } else continue;
     }
@@ -81,10 +87,13 @@ int SearchVocab(char *word) {
 }
 
 // Reads a word and returns its index in the vocabulary
-int ReadWordIndex(FILE *fin) {
-  char word[MAX_STRING];
-  ReadWord(word, fin);
-  if (feof(fin)) return -1;
+int ReadWordIndex(FILE *fin, char *eof) {
+  char word[MAX_STRING], eof_l = 0;
+  ReadWord(word, fin, &eof_l);
+  if (eof_l) {
+    *eof = 1;
+    return -1;
+  }
   return SearchVocab(word);
 }
 
@@ -156,9 +165,9 @@ void ReduceVocab() {
 }
 
 void LearnVocabFromTrainFile() {
-  char word[MAX_STRING], last_word[MAX_STRING], bigram_word[MAX_STRING * 2];
+  char word[MAX_STRING], last_word[MAX_STRING], bigram_word[MAX_STRING * 2], eof = 0;
   FILE *fin;
-  long long a, i, start = 1;
+  long long a, b, i, start = 1;
   for (a = 0; a < vocab_hash_size; a++) vocab_hash[a] = -1;
   fin = fopen(train_file, "rb");
   if (fin == NULL) {
@@ -168,15 +177,15 @@ void LearnVocabFromTrainFile() {
   vocab_size = 0;
   AddWordToVocab((char *)"</s>");
   while (1) {
-    ReadWord(word, fin);
-    if (feof(fin)) break;
-    if (!strcmp(word, "</s>")) {
+    ReadWord(word, fin, &eof);
+    if (eof) break;
+    if (word[0] == '\n') {
       start = 1;
       continue;
     } else start = 0;
     train_words++;
-    if ((debug_mode > 1) && (train_words % 100000 == 0)) {
-      printf("Words processed: %lldK     Vocab size: %lldK  %c", train_words / 1000, vocab_size / 1000, 13);
+    if ((debug_mode > 1) && (train_words % 1000000 == 0)) {
+      printf("Words processed: %lldM     Vocab size: %lldK  %c", train_words / 1000000, vocab_size / 1000, 13);
       fflush(stdout);
     }
     i = SearchVocab(word);
@@ -185,8 +194,25 @@ void LearnVocabFromTrainFile() {
       vocab[a].cn = 1;
     } else vocab[i].cn++;
     if (start) continue;
-    sprintf(bigram_word, "%s_%s", last_word, word);
+    //sprintf(bigram_word, "%s_%s", last_word, word);
+    a = 0;
+    b = 0;
+    while (last_word[a]) {
+      bigram_word[b] = last_word[a];
+      a++;
+      b++;
+    }
+    bigram_word[b] = '_';
+    b++;
+    a = 0;
+    while (word[a]) {
+      bigram_word[b] = word[a];
+      a++;
+      b++;
+    }
+    bigram_word[b] = 0;
     bigram_word[MAX_STRING - 1] = 0;
+    //
     strcpy(last_word, word);
     i = SearchVocab(bigram_word);
     if (i == -1) {
@@ -204,9 +230,10 @@ void LearnVocabFromTrainFile() {
 }
 
 void TrainModel() {
-  long long pa = 0, pb = 0, pab = 0, oov, i, li = -1, cn = 0;
-  char word[MAX_STRING], last_word[MAX_STRING], bigram_word[MAX_STRING * 2];
+  long long a, b, pa = 0, pb = 0, pab = 0, oov, i, li = -1, cn = 0;
+  char word[MAX_STRING], last_word[MAX_STRING], bigram_word[MAX_STRING * 2], eof = 0;
   real score;
+  unsigned long long next_random = 1;
   FILE *fo, *fin;
   printf("Starting training using file %s\n", train_file);
   LearnVocabFromTrainFile();
@@ -215,15 +242,16 @@ void TrainModel() {
   word[0] = 0;
   while (1) {
     strcpy(last_word, word);
-    ReadWord(word, fin);
-    if (feof(fin)) break;
-    if (!strcmp(word, "</s>")) {
-      fprintf(fo, "\n");
+    ReadWord(word, fin, &eof);
+    if (eof) break;
+    if (word[0] == '\n') {
+      //fprintf(fo, "\n");
+      fputc_unlocked('\n', fo);
       continue;
     }
     cn++;
-    if ((debug_mode > 1) && (cn % 100000 == 0)) {
-      printf("Words written: %lldK%c", cn / 1000, 13);
+    if ((debug_mode > 1) && (cn % 1000000 == 0)) {
+      printf("Words written: %lldM%c", cn / 1000000, 13);
       fflush(stdout);
     }
     oov = 0;
@@ -231,17 +259,41 @@ void TrainModel() {
     if (i == -1) oov = 1; else pb = vocab[i].cn;
     if (li == -1) oov = 1;
     li = i;
-    sprintf(bigram_word, "%s_%s", last_word, word);
+    //sprintf(bigram_word, "%s_%s", last_word, word);
+    a = 0;
+    b = 0;
+    while (last_word[a]) {
+      bigram_word[b] = last_word[a];
+      a++;
+      b++;
+    }
+    bigram_word[b] = '_';
+    b++;
+    a = 0;
+    while (word[a]) {
+      bigram_word[b] = word[a];
+      a++;
+      b++;
+    }
+    bigram_word[b] = 0;
     bigram_word[MAX_STRING - 1] = 0;
+    //
     i = SearchVocab(bigram_word);
     if (i == -1) oov = 1; else pab = vocab[i].cn;
     if (pa < min_count) oov = 1;
     if (pb < min_count) oov = 1;
     if (oov) score = 0; else score = (pab - min_count) / (real)pa / (real)pb * (real)train_words;
+    next_random = next_random * (unsigned long long)25214903917 + 11;
+    //if (next_random & 0x10000) score = 0;
     if (score > threshold) {
-      fprintf(fo, "_%s", word);
+      fputc_unlocked('_', fo);
       pb = 0;
-    } else fprintf(fo, " %s", word);
+    } else fputc_unlocked(' ', fo);
+    a = 0;
+    while (word[a]) {
+      fputc_unlocked(word[a], fo);
+      a++;
+    }
     pa = pb;
   }
   fclose(fo);

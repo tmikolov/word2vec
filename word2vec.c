@@ -424,6 +424,7 @@ void *TrainModelThread(void *id) {
       last_word_count = 0;
       sentence_length = 0;
       fseek(fi, file_size / (long long)num_threads * (long long)id, SEEK_SET);
+      eof = 0;
       continue;
     }
     word = sen[sentence_position];

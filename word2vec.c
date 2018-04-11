@@ -96,8 +96,8 @@ void ReadWord(char *word, FILE *fin, char *eof) {
 
 // Returns hash value of a word
 int GetWordHash(char *word) {
-  unsigned long long a, hash = 0;
-  for (a = 0; a < strlen(word); a++) hash = hash * 257 + word[a];
+  unsigned long long a, str_len, hash = 0;
+  for (a = 0, str_len = strlen(word); a < str_len; a++) hash = hash * 257 + word[a];
   hash = hash % vocab_hash_size;
   return hash;
 }
